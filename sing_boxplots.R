@@ -4,6 +4,7 @@
 
 ## load libraries
 library(ggplot2)
+library(cowplot)
 library(lme4)
 library(sjPlot)
 library(Rmisc)
@@ -11,49 +12,239 @@ library(lmerTest)
 require(mosaic)
 library(tidyverse)
 library(psycho)
-
+library(mosaic)
+library(here)
+library(Rmisc)
+library(RColorBrewer)
+library(reshape2)
+library(scales)
 ## read data
 dat<-read.csv('summarydat.csv')
 head(dat)
 dat<-transform(dat, Site = reorder(Site, dist_port))
+dat$sitenum <- as.numeric(dat$Site)
 
 ## ==============================
 ## ===       Box plots        ===
 ## ==============================
+
 ## Gnet
-(gnet<-ggplot(dat,aes(x=Site, y=gnet))+geom_boxplot(outlier.shape=NA) + 
-  geom_jitter( width = 0.15) + theme_bw())
+(gnet<-ggplot(dat,aes(x=sitenum, y=gnet, group = Site))+
+    geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = -5, ymax =15), fill='lightgrey')+
+  geom_boxplot(outlier.shape=NA) + 
+  geom_jitter( width = 0.15) + scale_y_continuous(name = expression(paste('Gnet (kg CaCO'[3],' m'^-2, ' yr'^-1, ')')),
+                                                  breaks = c(-5.0,0.0,5.0,10.0,15.0), limits = c(-5,15),
+                                                  labels = c('-5.0','0.0','5.0','10.0','15.0'),
+                                                  expand=c(0,0))+
+    scale_x_continuous(name = " ",breaks = c(1,2,3,4,5,6,7,8), labels = NULL)+
+   theme_minimal() + geom_vline(xintercept = 7.5, linetype=2)+
+   theme(panel.grid = element_blank(),
+         panel.background = element_rect(fill = NA, colour = NA),
+         axis.line = element_line(colour = 'black'),
+         axis.ticks = element_line(colour = 'black')))
 
 ## HC prod
-(hcprod<-ggplot(dat,aes(x=Site, y=hcprod_mean))+geom_boxplot() + 
-    geom_jitter( width = 0.15) + theme_bw())
+(hcprod<-ggplot(dat,aes(x=sitenum, y=hcprod_mean, group = Site))+
+    geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = 0, ymax =20), fill='lightgrey')+
+    geom_boxplot(outlier.shape=NA) + 
+    geom_jitter( width = 0.15) + scale_y_continuous(name = expression(paste('Coral G (kg CaCO'[3],' m'^-2, ' yr'^-1, ')')),
+                                                    breaks = c(0.0,5.0,10.0,15.0,20.0), limits = c(0,20),
+                                                    labels = c('0.0','5.0','10.0','15.0','20.0'),expand=c(0,0))+
+    scale_x_continuous(name = " ",breaks = c(1,2,3,4,5,6,7,8), 
+                       labels = NULL)+
+    theme_minimal() + geom_vline(xintercept = 7.5, linetype=2)+
+    theme(panel.grid = element_blank(),
+          panel.background = element_rect(fill = NA, colour = NA),
+          axis.line = element_line(colour = 'black'),
+          axis.ticks = element_line(colour = 'black')))
+
 
 ## cca
-(cca<-ggplot(dat,aes(x=Site, y=ccaprod_mean))+geom_boxplot() + 
-    geom_jitter( width = 0.15) + theme_bw())
+(cca<-ggplot(dat,aes(x=sitenum, y=ccaprod_mean, group = Site))+
+    geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = 0, ymax =0.2), fill='lightgrey')+
+    geom_boxplot(outlier.shape=NA) + 
+    geom_jitter( width = 0.15) + scale_y_continuous(name = expression(paste('CCA G (kg CaCO'[3],' m'^-2, ' yr'^-1, ')')),
+                                                    breaks = c(0,0.05,0.10,0.15,0.20), limits = c(0,0.20),
+                                                    expand=c(0,0))+
+    scale_x_continuous(name = " ",breaks = c(1,2,3,4,5,6,7,8), 
+                       labels = NULL)+
+    theme_minimal() + geom_vline(xintercept = 7.5, linetype=2)+
+    theme(panel.grid = element_blank(),
+          panel.background = element_rect(fill = NA, colour = NA),
+          axis.line = element_line(colour = 'black'),
+          axis.ticks = element_line(colour = 'black')))
+
+
 
 ## Erosion
-(eros<-ggplot(dat,aes(x=Site, y=eros_tot))+geom_boxplot() + 
-    geom_jitter( width = 0.15) + theme_bw()) + ylim(c(-4.5,0))
-
-## Coral cover
-(c_cover<-ggplot(dat,aes(x=Site, y=coral_cover))+geom_boxplot() + 
-    geom_jitter( width = 0.15) + theme_bw())
-(c_coverw<-ggplot(dat,aes(x=Site, y=cover_general))+geom_boxplot() + 
-    geom_jitter( width = 0.15) + theme_bw())
-(c_cover<-ggplot(dat,aes(x=Site, y=cover_stress))+geom_boxplot() + 
-    geom_jitter( width = 0.15) + theme_bw())
-
-## dot plots
-(cov_prod <- ggplot(subset(dat, Site != 'Mean'), aes(x=coral_cover, y=gnet, colour = Site)) + geom_point()) 
-(cov_prod <- ggplot(subset(dat, Site != 'Mean'), aes(x=cover_general/100*coral_cover, y=gnet, colour = Site))
-  + geom_point()) 
-(cov_prod <- ggplot(subset(dat, Site != 'Mean'), aes(x=cover_stress/100*coral_cover, y=hcprod_mean, colour = Site))
-  + geom_point()) 
-(cov_prod <- ggplot(subset(dat, Site != 'Mean'), aes(x=cover_weedy/100*coral_cover, y=hcprod_mean, colour = Site))
-  + geom_point())
-
-## contribution of functional coral groups
 
 
+(eros<-ggplot(dat,aes(x=sitenum, y=eros_tot, group = Site))+
+    geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = -4.5, ymax =0), fill='lightgrey')+
+    geom_boxplot(outlier.shape=NA) + 
+    geom_jitter( width = 0.15) + scale_y_continuous(name = expression(paste('Erosion (kg CaCO'[3],' m'^-2, ' yr'^-1, ')')),
+                                                    breaks = c(0,-1,-2,-3,-4), limits = c(-4.5,0),
+                                                    labels = c('0.0','-1.0','-2.0','-3.0','-4.0'),expand=c(0,0))+
+    scale_x_continuous(name = NULL,breaks = c(1,2,3,4,5,6,7,8), 
+                       labels = c('P.Hantu', 'TPT','P.Djong', 'P.Semakau', 'Sisters',
+                                  'P.Kusu', 'Raffles', 'All'))+
+    theme_minimal() + geom_vline(xintercept = 7.5, linetype=2)+
+    theme(panel.grid = element_blank(),
+          panel.background = element_rect(fill = NA, colour = NA),
+          axis.line = element_line(colour = 'black'),
+          axis.ticks = element_line(colour = 'black'),
+          axis.text.x = element_text(size = 12, angle = 90)))
+
+
+plot_grid(gnet, hcprod, cca, eros, align = 'v', nrow=4, rel_heights = 
+            c(4/16,4/16,3/16,5/16))
+
+ggsave(here("figs", 
+            "Fig_2.png"), 
+       width = 6, height = 16)
+
+## Coral cover ################
+
+## work out which is dominant PRODUCER morphology
+dat$pprodmass <- dat$prod_mass/dat$hcprod_mean
+dat$pprodenc <- dat$prod_enc/dat$hcprod_mean
+dat$pprodbranch <- dat$prod_branchinf/dat$hcprod_mean
+dat$propoth<-1-(dat$pprodbranch+dat$pprodenc+dat$pprodmass)
+
+dat$domprod<-ifelse(dat$pprodmass > 0.5, 'M', ifelse(dat$pprodenc >0.5, 'E',
+              ifelse(dat$pprodbranch > 0.5, 'B', ifelse(dat$propoth >0.5,'O', 'N'))))
+
+## work out which is dominant cover LHS
+
+dat$domcoverlhs<-ifelse(dat$cover_comp > 50, 'C', ifelse(dat$cover_general > 50, 'G',
+                                                     ifelse(dat$cover_weedy > 50, 'W',
+                                                            ifelse(dat$cover_stress > 50, 'S', 'N'))))
+
+## to do the LHS contribution graph
+lhdat<-dat[,c(3,62:65)]
+lhdatmelt<-melt(lhdat, id.vars='Site')
+
+a<-summarySE(data=lhdatmelt, measurevar = 'value', groupvars = c('Site', ' variable'))
+b<-summarySE(data=dat, measurevar = 'coral_cover', groupvars = c('Site'))
+ggplot(a,aes(x = Site, y = value)) + 
+  geom_col(aes(fill = variable), position = "fill",stat = "identity", colour = 'black', linetype=1) +
+  scale_y_continuous(labels = percent_format(), expand = c(0,0), sec.axis=dup_axis(name = 'Total Coral Cover (%)' ))+
+
+   geom_point(data=b, aes(x=Site, y = coral_cover/100), size=4)+
+   geom_errorbar(data=b, aes(x = Site, ymin = (coral_cover-ci)/100, ymax = (coral_cover+ci)/100),
+                 width = 0, inherit.aes = F)+
+  # geom_boxplot(data=dat, aes(x = Site, y = coral_cover/100), fill = 'lightgrey', colour = 'black',
+  #              outlier.shape = NA, alpha = 0.25)+
+  # geom_jitter(data =dat, aes(x = Site, y= coral_cover/100), width = 0.15) +
+   scale_x_discrete(name = NULL, 
+                     labels = c('P.Hantu', 'TPT','P.Djong', 'P.Semakau', 'Sisters',
+                                'P.Kusu', 'Raffles', 'All'))+
+  scale_fill_npg(labels = c('Competitive', 'Weedy', 'Generalist', 'Stress Tolerant'))+
+  theme_minimal() + 
+  labs(y = 'Contribution to Coral G (%)')+
+  theme(panel.grid = element_blank(),
+        panel.background = element_rect(fill = NA, colour = NA),
+        axis.line = element_line(colour = 'black'),
+        axis.ticks = element_line(colour = 'black'),
+        axis.text.x = element_text(size = 12, angle = 90),
+        legend.position = 'top', legend.title = element_blank(),
+        legend.spacing.x = unit(0.4, 'cm'),
+        legend.key.height = unit(0.2, 'cm'),
+        legend.key.width = unit(0.8, 'cm'),
+        axis.text = element_text(colour ='black'))
+
+ggsave(here("figs", 
+            "Fig_3A.png"), 
+       width = 6, height = 5)
+
+## ============================== ##
+
+## ====   ANALYSIS ==============
+
+## ==============================
+
+##Gnet
+
+## check for normality
+qqnorm(subset(dat, Site != 'Mean')$gnet)
+qqnorm(log(subset(dat, Site != 'Mean')$gnet +( 1 - min(dat$gnet))))
+qqline(log(subset(dat, Site != 'Mean')$gnet +( 1 - min(dat$gnet))))
+
+## transform gnet
+dat$tgnet<-log(dat$gnet+(1-min(dat$gnet)))
+
+m1<-aov(tgnet ~ Site, data = subset(dat, Site != 'Mean'))
+summary(m1)               
+TukeyHSD(m1, 'Site', ordered = FALSE, conf.level = 0.95)
+
+## Djong is different from TPT, Hantu, Raffles & Semakau at > 0.05, 
+## and from Sisters, and Kusu at < 0.1
+## Hantu different from Sisters and Kusu at < 0.1
+
+##Hc production
+
+## check for normality
+qqnorm(subset(dat, Site != 'Mean')$hcprod_mean)
+qqnorm(sqrt(subset(dat, Site != 'Mean')$hcprod_mean))
+qqline(sqrt(subset(dat, Site != 'Mean')$hcprod_mean))
+
+m2<-aov(sqrt(hcprod_mean) ~ Site, data = subset(dat, Site != 'Mean'))
+summary(m2)               
+TukeyHSD(m2, 'Site', ordered = FALSE, conf.level = 0.95)
+
+## Djong is different from TPT, Hantu, Raffles & Semakau at > 0.05, 
+## and from Sisters, and Kusu at < 0.1
+
+##CCA production
+
+## check for normality
+qqnorm(subset(dat, Site != 'Mean')$ccaprod_mean)
+qqnorm(log(subset(dat, Site != 'Mean')$ccaprod_mean +( 1 - min(dat$ccaprod_mean))))
+qqline(log(subset(dat, Site != 'Mean')$ccaprod_mean+ ( 1 - min(dat$ccaprod_mean))))
+
+## transform gnet
+dat$tcca<-log(dat$ccaprod_mean+(1-min(dat$ccaprod_mean)))
+
+m3<-aov(sqrt(tcca) ~ Site, data = subset(dat, Site != 'Mean'))
+summary(m3)               
+TukeyHSD(m3, 'Site', ordered = FALSE, conf.level = 0.95)
+
+## total erosion
+## check for normality
+qqnorm(subset(dat, Site != 'Mean')$eros_tot)
+qqline(subset(dat, Site != 'Mean')$eros_tot)
+
+m4<-aov(eros_tot ~ Site, data = subset(dat, Site != 'Mean'))
+summary(m4)               
+TukeyHSD(m4, 'Site', ordered = FALSE, conf.level = 0.95)
+
+## Hantu is different from all but TPT at < 0.05
+##  TPT is different from Sisters, Kusu & Raffles
+## Djong is different from hantu, kuku & raffles at < 0.05 (Siters at <0.1)
+## Semakau is different from Kuku, sisters and raffles
+##  Sisters is different from Raffles
+
+################ PLAY ######################################
+
+(g<-ggplot(dat, aes(x=coral_cover, y=gnet, colour = domcoverlhs))+geom_point()+stat_smooth(method='lm'))
+
+(ccover<-ggplot(dat,aes(x=sitenum, y=coral_cover, colour = domcoverlhs))+
+   # geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = -5, ymax =15), fill='lightgrey')+
+    geom_boxplot(outlier.shape=NA, aes(group=Site)))  +
+    geom_jitter( width = 0.15, size = 5) + scale_y_continuous(name = expression(paste('Coral cover (%)'),
+                                                    breaks = c(0,20,40,60,80), limits = c(0,80),
+                                                    expand=c(0,0))+
+    scale_x_continuous(name = " ",breaks = c(1,2,3,4,5,6,7,8), labels = NULL)+
+    theme_minimal() + geom_vline(xintercept = 7.5, linetype=2)+
+    theme(panel.grid = element_blank(),
+          panel.background = element_rect(fill = NA, colour = NA),
+          axis.line = element_line(colour = 'black'),
+          axis.ticks = element_line(colour = 'black')))
+
+
+
+m1<-lm(eros_tot ~ dist_port  , data = subset(dat, Site != 'Mean'))
+m1
+summary(m1)               
+TukeyHSD(m1, 'Site', ordered = FALSE, conf.level = 0.95)
 

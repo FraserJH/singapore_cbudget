@@ -35,5 +35,5 @@ gg
 
 
 ggsave(here("figs", 
-            "Fig_1.pdf"), 
+            "Fig_1.png"), 
        width = 8, height = 5)
