@@ -53,9 +53,7 @@ dat<-transform(dat, Site = reorder(Site, dist_port))
 (cov_prod <- ggplot(subset(dat, Site != 'Mean'), aes(x=cover_weedy/100*coral_cover, y=hcprod_mean, colour = Site))
   + geom_point())
 
-
-
 ## contribution of functional coral groups
-p<-ggplot(data = dat, aes(x = Site, y = ))
+
 
 
