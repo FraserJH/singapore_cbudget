@@ -9,7 +9,7 @@ library(lme4)
 library(sjPlot)
 library(Rmisc)
 library(lmerTest)
-require(mosaic)
+library(mosaic)
 library(tidyverse)
 library(psycho)
 library(mosaic)
@@ -18,25 +18,28 @@ library(Rmisc)
 library(RColorBrewer)
 library(reshape2)
 library(scales)
+library(ggsci)
 ## read data
 dat<-read.csv('summarydat.csv')
 head(dat)
 dat<-transform(dat, Site = reorder(Site, dist_port))
 dat$sitenum <- as.numeric(dat$Site)
-
+dat<-dat[-c(43,86),]
 ## ==============================
 ## ===       Box plots        ===
 ## ==============================
 
 ## Gnet
 (gnet<-ggplot(dat,aes(x=sitenum, y=gnet, group = Site))+
-    geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = -5, ymax =15), fill='lightgrey')+
+    geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = -5, ymax =12), fill='lightgrey')+
   geom_boxplot(outlier.shape=NA) + 
   geom_jitter( width = 0.15) + scale_y_continuous(name = expression(paste('Gnet (kg CaCO'[3],' m'^-2, ' yr'^-1, ')')),
-                                                  breaks = c(-5.0,0.0,5.0,10.0,15.0), limits = c(-5,15),
-                                                  labels = c('-5.0','0.0','5.0','10.0','15.0'),
+                                                  breaks = c(-5.0,0.0,5.0,10.0,12), limits = c(-5,12),
+                                                  labels = c('-5.0','0.0','5.0','10.0',''),
                                                   expand=c(0,0))+
-    scale_x_continuous(name = " ",breaks = c(1,2,3,4,5,6,7,8), labels = NULL)+
+   scale_x_continuous(name = NULL,breaks = c(1,2,3,4,5,6,7,8), 
+                      labels = c('P.Hantu', 'TPT','P.Djong', 'P.Semakau', 'Sisters',
+                                 'P.Kusu', 'Raffles', 'All'))+
    theme_minimal() + geom_vline(xintercept = 7.5, linetype=2)+
    theme(panel.grid = element_blank(),
          panel.background = element_rect(fill = NA, colour = NA),
@@ -45,11 +48,11 @@ dat$sitenum <- as.numeric(dat$Site)
 
 ## HC prod
 (hcprod<-ggplot(dat,aes(x=sitenum, y=hcprod_mean, group = Site))+
-    geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = 0, ymax =20), fill='lightgrey')+
+    geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = 0, ymax =12), fill='lightgrey')+
     geom_boxplot(outlier.shape=NA) + 
     geom_jitter( width = 0.15) + scale_y_continuous(name = expression(paste('Coral G (kg CaCO'[3],' m'^-2, ' yr'^-1, ')')),
-                                                    breaks = c(0.0,5.0,10.0,15.0,20.0), limits = c(0,20),
-                                                    labels = c('0.0','5.0','10.0','15.0','20.0'),expand=c(0,0))+
+                                                    breaks = c(0.0,5.0,10.0,12), limits = c(0,12),
+                                                    labels = c('0.0','5.0','10.0', ''),expand=c(0,0))+
     scale_x_continuous(name = " ",breaks = c(1,2,3,4,5,6,7,8), 
                        labels = NULL)+
     theme_minimal() + geom_vline(xintercept = 7.5, linetype=2)+
@@ -80,14 +83,13 @@ dat$sitenum <- as.numeric(dat$Site)
 
 
 (eros<-ggplot(dat,aes(x=sitenum, y=eros_tot, group = Site))+
-    geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = -4.5, ymax =0), fill='lightgrey')+
+    geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = -3.2, ymax =0), fill='lightgrey')+
     geom_boxplot(outlier.shape=NA) + 
     geom_jitter( width = 0.15) + scale_y_continuous(name = expression(paste('Erosion (kg CaCO'[3],' m'^-2, ' yr'^-1, ')')),
-                                                    breaks = c(0,-1,-2,-3,-4), limits = c(-4.5,0),
-                                                    labels = c('0.0','-1.0','-2.0','-3.0','-4.0'),expand=c(0,0))+
-    scale_x_continuous(name = NULL,breaks = c(1,2,3,4,5,6,7,8), 
-                       labels = c('P.Hantu', 'TPT','P.Djong', 'P.Semakau', 'Sisters',
-                                  'P.Kusu', 'Raffles', 'All'))+
+                                                    breaks = c(0,-1,-2,-3,-3.2), limits = c(-3.2,0),
+                                                    labels = c('0.0','-1.0','-2.0','-3.0',''),expand=c(0,0))+
+    scale_x_continuous(name = " ",breaks = c(1,2,3,4,5,6,7,8), 
+                       labels = NULL)+
     theme_minimal() + geom_vline(xintercept = 7.5, linetype=2)+
     theme(panel.grid = element_blank(),
           panel.background = element_rect(fill = NA, colour = NA),
@@ -96,12 +98,12 @@ dat$sitenum <- as.numeric(dat$Site)
           axis.text.x = element_text(size = 12, angle = 90)))
 
 
-plot_grid(gnet, hcprod, cca, eros, align = 'v', nrow=4, rel_heights = 
-            c(4/16,4/16,3/16,5/16))
+plot_grid(hcprod, eros,  gnet,  align = 'v', nrow=3, rel_heights = 
+            c(5/16,5/16,6/16))
 
 ggsave(here("figs", 
             "Fig_2.png"), 
-       width = 6, height = 16)
+       width = 6, height = 12)
 
 ## Coral cover ################
 
@@ -128,10 +130,10 @@ a<-summarySE(data=lhdatmelt, measurevar = 'value', groupvars = c('Site', ' varia
 b<-summarySE(data=dat, measurevar = 'coral_cover', groupvars = c('Site'))
 ggplot(a,aes(x = Site, y = value)) + 
   geom_col(aes(fill = variable), position = "fill",stat = "identity", colour = 'black', linetype=1) +
-  scale_y_continuous(labels = percent_format(), expand = c(0,0), sec.axis=dup_axis(name = 'Total Coral Cover (%)' ))+
+  scale_y_continuous(labels = percent_format(), expand = c(0,0), sec.axis=sec_axis(~./2, name = 'Total Coral Cover (%)', labels=percent_format() ))+
 
-   geom_point(data=b, aes(x=Site, y = coral_cover/100), size=4)+
-   geom_errorbar(data=b, aes(x = Site, ymin = (coral_cover-ci)/100, ymax = (coral_cover+ci)/100),
+   geom_point(data=b, aes(x=Site, y = coral_cover/50), size=4)+
+   geom_errorbar(data=b, aes(x = Site, ymin = (coral_cover-ci)/50, ymax = (coral_cover+ci)/50),
                  width = 0, inherit.aes = F)+
   # geom_boxplot(data=dat, aes(x = Site, y = coral_cover/100), fill = 'lightgrey', colour = 'black',
   #              outlier.shape = NA, alpha = 0.25)+
@@ -177,6 +179,8 @@ m1<-aov(tgnet ~ Site, data = subset(dat, Site != 'Mean'))
 summary(m1)               
 TukeyHSD(m1, 'Site', ordered = FALSE, conf.level = 0.95)
 
+summarySE(data=dat, measurevar = 'gnet', groupvars = 'Site')
+
 ## Djong is different from TPT, Hantu, Raffles & Semakau at > 0.05, 
 ## and from Sisters, and Kusu at < 0.1
 ## Hantu different from Sisters and Kusu at < 0.1
@@ -185,12 +189,13 @@ TukeyHSD(m1, 'Site', ordered = FALSE, conf.level = 0.95)
 
 ## check for normality
 qqnorm(subset(dat, Site != 'Mean')$hcprod_mean)
-qqnorm(sqrt(subset(dat, Site != 'Mean')$hcprod_mean))
-qqline(sqrt(subset(dat, Site != 'Mean')$hcprod_mean))
+qqline(subset(dat, Site != 'Mean')$hcprod_mean)
 
-m2<-aov(sqrt(hcprod_mean) ~ Site, data = subset(dat, Site != 'Mean'))
+m2<-aov(hcprod_mean ~ Site, data = subset(dat, Site != 'Mean'))
 summary(m2)               
 TukeyHSD(m2, 'Site', ordered = FALSE, conf.level = 0.95)
+
+summarySE(data=dat, measurevar = 'hcprod_mean', groupvars = 'Site')
 
 ## Djong is different from TPT, Hantu, Raffles & Semakau at > 0.05, 
 ## and from Sisters, and Kusu at < 0.1
@@ -211,18 +216,28 @@ TukeyHSD(m3, 'Site', ordered = FALSE, conf.level = 0.95)
 
 ## total erosion
 ## check for normality
-qqnorm(subset(dat, Site != 'Mean')$eros_tot)
-qqline(subset(dat, Site != 'Mean')$eros_tot)
+qqnorm(sqrt(subset(dat, Site != 'Mean')$eros_tot+( 1 - min(dat$eros_tot))))
+qqline(subset(dat, Site != 'Mean')$eros_tot+( 1 - min(dat$eros_tot)))
 
 m4<-aov(eros_tot ~ Site, data = subset(dat, Site != 'Mean'))
 summary(m4)               
 TukeyHSD(m4, 'Site', ordered = FALSE, conf.level = 0.95)
+
+summarySE(data=dat, measurevar = 'eros_tot', groupvars = 'Site')
 
 ## Hantu is different from all but TPT at < 0.05
 ##  TPT is different from Sisters, Kusu & Raffles
 ## Djong is different from hantu, kuku & raffles at < 0.05 (Siters at <0.1)
 ## Semakau is different from Kuku, sisters and raffles
 ##  Sisters is different from Raffles
+
+qqnorm(subset(dat, Site != 'Mean')$coral_cover)
+qqline(subset(dat, Site != 'Mean')$coral_cover)
+
+m5<-aov(coral_cover ~ Site, data = subset(dat, Site != 'Mean'))
+summary(m5)               
+TukeyHSD(m5, 'Site', ordered = FALSE, conf.level = 0.95)
+
 
 ################ PLAY ######################################
 
@@ -247,4 +262,6 @@ m1<-lm(eros_tot ~ dist_port  , data = subset(dat, Site != 'Mean'))
 m1
 summary(m1)               
 TukeyHSD(m1, 'Site', ordered = FALSE, conf.level = 0.95)
+
+summarySE(data=dat, measurevar = 'coral_cover', groupvars = 'Site')
 
