@@ -3,6 +3,8 @@
 ## ==============================
 
 ## load libraries
+library(devtools)
+library(fishualize)
 library(ggplot2)
 library(cowplot)
 library(lme4)
@@ -20,7 +22,7 @@ library(reshape2)
 library(scales)
 library(ggsci)
 ## read data
-dat<-read.csv('summarydat.csv')
+dat<-read.csv('summarydat_newintbio.csv')
 head(dat)
 dat<-transform(dat, Site = reorder(Site, dist_port))
 dat$sitenum <- as.numeric(dat$Site)
@@ -28,7 +30,7 @@ dat<-dat[-c(43,86),]
 ## ==============================
 ## ===       Box plots        ===
 ## ==============================
-
+pal<-fish(8, option = 'Naso lituratus')
 ## Gnet
 (gnet<-ggplot(dat,aes(x=sitenum, y=gnet, group = Site))+
     geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = -5, ymax =12), fill='lightgrey')+
@@ -83,11 +85,11 @@ dat<-dat[-c(43,86),]
 
 
 (eros<-ggplot(dat,aes(x=sitenum, y=eros_tot, group = Site))+
-    geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = -3.2, ymax =0), fill='lightgrey')+
+    geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = -8, ymax =0), fill='lightgrey')+
     geom_boxplot(outlier.shape=NA) + 
     geom_jitter( width = 0.15) + scale_y_continuous(name = expression(paste('Erosion (kg CaCO'[3],' m'^-2, ' yr'^-1, ')')),
-                                                    breaks = c(0,-1,-2,-3,-3.2), limits = c(-3.2,0),
-                                                    labels = c('0.0','-1.0','-2.0','-3.0',''),expand=c(0,0))+
+                                                    breaks = c(0,-2,-4,-6,-8), limits = c(-8,0),
+                                                    labels = c('0.0','-2.0','-4.0','-6.0','-8.0'),expand=c(0,0))+
     scale_x_continuous(name = " ",breaks = c(1,2,3,4,5,6,7,8), 
                        labels = NULL)+
     theme_minimal() + geom_vline(xintercept = 7.5, linetype=2)+
@@ -98,11 +100,9 @@ dat<-dat[-c(43,86),]
           axis.text.x = element_text(size = 12, angle = 90)))
 
 
-plot_grid(hcprod, eros,  gnet,  align = 'v', nrow=3, rel_heights = 
-            c(5/16,5/16,6/16))
-
+grid.arrange(hcprod, eros,gnet, newpage=T)
 ggsave(here("figs", 
-            "Fig_2.png"), 
+            "Fig_3_nib.png"), 
        width = 6, height = 12)
 
 ## Coral cover ################
@@ -175,7 +175,7 @@ qqline(log(subset(dat, Site != 'Mean')$gnet +( 1 - min(dat$gnet))))
 ## transform gnet
 dat$tgnet<-log(dat$gnet+(1-min(dat$gnet)))
 
-m1<-aov(tgnet ~ Site, data = subset(dat, Site != 'Mean'))
+m1<-aov(gnet ~ Site, data = subset(dat, Site != 'Mean'))
 summary(m1)               
 TukeyHSD(m1, 'Site', ordered = FALSE, conf.level = 0.95)
 
