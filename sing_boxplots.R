@@ -25,7 +25,7 @@ dat<-read.csv('summarydat_newintbio.csv')
 head(dat)
 dat<-transform(dat, Site = reorder(Site, dist_port))
 dat$sitenum <- as.numeric(dat$Site)
-dat<-dat[-c(43,86),]
+
 ## ==============================
 ## ===       Box plots        ===
 ## ==============================
@@ -38,16 +38,16 @@ pal<-fish(8, option = 'Naso_lituratus')
   geom_jitter( width = 0.15) + scale_y_continuous(name = expression(paste('Gnet (kg CaCO'[3],' m'^-2, ' yr'^-1, ')')),
                                                   breaks = c(-4.0,-2.0,0.0,2.0,4.0,6.0,8.0,10.0,12), limits = c(-4,12),
                                                   labels = c('-4.0','-2.0', '0.0','2.0','4.0','6.0','8.0','10.0', ''),
-                                                  expand=c(0,0))+
-   scale_x_continuous(name = NULL,breaks = c(1,2,3,4,5,6,7,8), 
-                      labels = c('P.Hantu', 'TPT','P.Jong', 'P.Semakau', 'Sisters',
-                                 'P.Kusu', 'P. Satuma', 'All'))+
-   theme_minimal() + geom_vline(xintercept = 7.5, linetype=2)+
+                                                  expand = c(0,0))+
+   scale_x_continuous(name = NULL,breaks = c(1,2,3,4,5,6,7,8))+
+   theme_minimal(base_family = 'sans')+
+   geom_vline(xintercept = 7.5, linetype=2)+
     geom_hline(yintercept=0, linetype = 2)+
    theme(panel.grid = element_blank(),
          panel.background = element_rect(fill = NA, colour = NA),
          axis.line = element_line(colour = 'black'),
          axis.ticks = element_line(colour = 'black'),
+
          legend.position = 'none'))
 
 ## HC prod
@@ -98,9 +98,7 @@ pal<-fish(8, option = 'Naso_lituratus')
     geom_jitter( width = 0.15) + scale_y_continuous(name = expression(paste('Erosion (kg CaCO'[3],' m'^-2, ' yr'^-1, ')')),
                                                     breaks = c(2,1,0,-1,-2,-3,-4,-5), limits = c(-5,2),
                                                     labels = c('2.0','1.0','0.0','-1.0','-2.0','-3.0','-4.0',''),expand=c(0,0))+
-    scale_x_continuous(name = NULL,breaks = c(1,2,3,4,5,6,7,8), 
-                       labels = c('P.Hantu', 'TPT','P.Jong', 'P.Semakau', 'Sisters',
-                                  'P.Kusu', 'P. Satuma', 'All'))+
+    scale_x_continuous(name = NULL,breaks = c(1,2,3,4,5,6,7,8))+
     theme_minimal() + geom_vline(xintercept = 7.5, linetype=2)+
     geom_hline(yintercept = 0, linetype = 2)+
     theme(panel.grid = element_blank(),
@@ -109,13 +107,31 @@ pal<-fish(8, option = 'Naso_lituratus')
           axis.ticks = element_line(colour = 'black'), 
           legend.position = 'none'))
 
-(rug<-ggplot(dat,aes(x=sitenum, y=rug, group = Site))+
-    geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = 0, ymax =3.5), fill='lightgrey')+
+(coral<-ggplot(dat,aes(x=sitenum, y=coral_cover, group = Site))+
+    geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = 0, ymax =50), fill='lightgrey')+
     geom_boxplot(outlier.shape=NA, aes(fill = Site)) + 
     scale_fill_fish_d(option = "Naso_lituratus") + 
-    geom_jitter( width = 0.15) + scale_y_continuous(name = expression(paste('Erosion (kg CaCO'[3],' m'^-2, ' yr'^-1, ')')),
-                                                    breaks = c(3.5,3, 2,1,0,-1,-2,-3,-4,-5), limits = c(0,3.5),
-                                                    labels = c('', '3.0', '2.0','1.0','0.0','-1.0','-2.0','-3.0','-4.0',''),expand=c(0,0))+
+    geom_jitter( width = 0.15) + scale_y_continuous(name = expression(paste('Coral Cover (%)')),
+                                                    breaks = c(0,10,20,30,40,50), limits = c(0,50),
+                                                    labels = c('0', '10', '20','30','40','50'),expand=c(0,0))+
+    scale_x_continuous(name = NULL,breaks = c(1,2,3,4,5,6,7,8), 
+                       labels = c('P.Hantu', 'TPT','P.Jong', 'P.Semakau', 'Sisters',
+                                  'P.Kusu', 'P. Satuma', 'All'))+
+    theme_minimal() + geom_vline(xintercept = 7.5, linetype=2)+
+    geom_hline(yintercept = 0, linetype = 2)+
+    theme(panel.grid = element_blank(),
+          panel.background = element_rect(fill = NA, colour = NA),
+          axis.line = element_line(colour = 'black'),
+          axis.ticks = element_line(colour = 'black'), 
+          legend.position = 'none'))
+
+(turf<-ggplot(dat,aes(x=sitenum, y=(turf_cover+mac_cover), group = Site))+
+    geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = 0, ymax =60), fill='lightgrey')+
+    geom_boxplot(outlier.shape=NA, aes(fill = Site)) + 
+    scale_fill_fish_d(option = "Naso_lituratus") + 
+    geom_jitter( width = 0.15) + scale_y_continuous(name = expression(paste('Algal cover (%)')),
+                                                    breaks = c(0,10,20,30,40,50,60), limits = c(0,60),
+                                                    labels = c('0', '10', '20','30','40','50','60'),expand=c(0,0))+
     scale_x_continuous(name = NULL,breaks = c(1,2,3,4,5,6,7,8), 
                        labels = c('P.Hantu', 'TPT','P.Jong', 'P.Semakau', 'Sisters',
                                   'P.Kusu', 'P. Satuma', 'All'))+
@@ -128,11 +144,11 @@ pal<-fish(8, option = 'Naso_lituratus')
           legend.position = 'none'))
 
 
-plot_grid(hcprod,  cca,eros,gnet, labels = c('A', 'B', 'C', 'D'), label_size = 12, align = 'v',
-          nrow =2, axis='l')
+plot_grid(hcprod,  cca,eros,gnet, coral,turf, labels = c('A', 'B', 'C', 'D', 'E', 'F'), label_size = 12, align = 'v',
+          nrow =3, axis='l')
 ggsave(here("figs", 
             "Fig_3_nib.png"), 
-       width = 12, height = 8)
+       width = 12, height = 12)
 
 
 ## Coral cover ################
@@ -160,11 +176,11 @@ a<-summarySE(data=lhdatmelt, measurevar = 'value', groupvars = c('Site', ' varia
 b<-summarySE(data=dat, measurevar = 'coral_cover', groupvars = c('Site'))
 ggplot(a,aes(x = Site, y = value)) + 
   geom_col(aes(fill = variable), position = "fill",stat = "identity", colour = 'black', linetype=1) +
-  scale_y_continuous(labels = percent_format(), expand = c(0,0), sec.axis=sec_axis(~./2, name = 'Total Coral Cover (%)', labels=percent_format() ))+
+  scale_y_continuous(labels = percent_format(), expand = c(0,0))+
 
-   geom_point(data=b, aes(x=Site, y = coral_cover/50), size=4)+
-   geom_errorbar(data=b, aes(x = Site, ymin = (coral_cover-ci)/50, ymax = (coral_cover+ci)/50),
-                 width = 0, inherit.aes = F)+
+#   geom_point(data=b, aes(x=Site, y = coral_cover/50), size=4)+
+ #  geom_errorbar(data=b, aes(x = Site, ymin = (coral_cover-ci)/50, ymax = (coral_cover+ci)/50),
+  #               width = 0, inherit.aes = F)+
   # geom_boxplot(data=dat, aes(x = Site, y = coral_cover/100), fill = 'lightgrey', colour = 'black',
   #              outlier.shape = NA, alpha = 0.25)+
   # geom_jitter(data =dat, aes(x = Site, y= coral_cover/100), width = 0.15) +
@@ -282,6 +298,19 @@ TukeyHSD(m6, 'Site', ordered = FALSE, conf.level = 0.95)
 
 summarySE(data=dat, measurevar = 'rug', groupvars = 'Site')
 
+dat$cover_weedy <- dat$cover_weedy*(dat$coral_cover/100)
+dat$cover_stress <- dat$cover_stress*(dat$coral_cover/100)
+dat$cover_general <- dat$cover_general*(dat$coral_cover/100)
+dat$cover_comp <- dat$cover_comp*(dat$coral_cover/100)
+
+m7<-lm(tgnet ~ cover_weedy+cover_comp+cover_general+cover_stress,
+       data =subset(dat, Site != 'Mean'))
+summary(m7)
+m8<-lmer(tgnet ~ cover_weedy+cover_comp+cover_general+cover_stress+(1|Site),
+       data =subset(dat, Site != 'Mean'))
+summary(m8)
+AIC(m7,m8)
+plot_model(m7, type = 'std')
 
 ################ PLAY ######################################
 
