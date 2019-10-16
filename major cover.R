@@ -33,7 +33,7 @@ maj_cover$tot_other <-maj_cover$fol + maj_cover$mush +maj_cover$oth
 maj_cover$tot_cover <-maj_cover$tot_mass + maj_cover$tot_enc + maj_cover$tot_other + maj_cover$tot_branch
 
 maj_cover$dom<-colnames(maj_cover[,c(31:34)])[max.col(maj_cover[,c(31:34)],ties.method="first")]
-Gnet (kg CaCO'[3],' m'^-2, ' yr'^-1, ')
+# Gnet (kg CaCO'[3],' m'^-2, ' yr'^-1, ')
 
 pal<-c('#e9ef6f','#90b3fa','#626175','#ff9100')
 (all<-ggplot(data=maj_cover, aes(x = tot_cover, y = gnet))+
@@ -145,9 +145,10 @@ qqline(maj_cover$gnet)
 maj_cover$tgnet<-log(maj_cover$gnet +( 1 - min(maj_cover$gnet)))
 
 maj_cover
-m1<-lm(tgnet~tot_mass + tot_enc + tot_branch + tot_other , data=maj_cover)
+m1<-lm(tgnet~tot_mass + tot_enc + tot_branch + tot_other +numb_gen , data=maj_cover)
+plot(m1)
 summary(m1)
-m2<-lmer(tgnet~tot_mass + tot_enc + tot_branch + tot_other + (1|Site), data=maj_cover)
+m2<-lmer(tgnet~tot_mass + tot_enc + tot_branch + tot_other + numb_gen + (1|Site), data=maj_cover)
 summary(m2)
 plot(m2)
 AIC(m1,m2)
@@ -156,7 +157,7 @@ ggpredict(m1, 'tot_enc')
 
 sjp.lmer(m1, type='pred', terms='Rugosity')
 plot(m2)
-(a<-plot_model(m1, type='resid'))
+(a<-plot_model(m1, type='slope'))
 names(a)
 a<-a$data
 a$predicted<-exp(a$predicted) - 1-min(maj_cover$gnet)
@@ -219,4 +220,44 @@ predict(m2)
 f<-(maj_cover$tot_mass*0.061234)
 plot(maj_cover$tgnet, f)
 plot_model(m2, type = "pred", terms = "tot_mass")
-     
+
+####model selection##########
+
+names(maj_cover)
+
+m0<-lm(tgnet~1, data = maj_cover)
+mm0<-lmer(tgnet~1+(1|Site), data = maj_cover)
+m1<-lm(tgnet~cca_cover + mac_cover +turf_cover + numb_gen + tot_mass + tot_enc +
+         tot_branch + tot_other, dat = maj_cover)
+mm1<-lmer(tgnet~cca_cover + mac_cover +turf_cover + numb_gen + tot_mass + tot_enc +
+         tot_branch + tot_other + (1|Site), dat = maj_cover)
+mc<-lm(tgnet~cca_cover + mac_cover +turf_cover + numb_gen +tot_cover, data = maj_cover)
+options(na.action = 'na.fail')
+mods<-dredge(m1)
+head(mods)
+b<-model.avg(mods, subset = delta<2, beta='sd')
+b<-model.avg(mods, subset = cumsum(weight) <= .95)
+summary(b)
+
+m2<-lm(tgnet~cca_cover + mac_cover +turf_cover + numb_gen + stress + general+
+       comp + weedy, dat = maj_cover)
+mm2<-lmer(tgnet~cca_cover + mac_cover +turf_cover + numb_gen +  stress + general+
+          comp + weedy + (1|Site), dat = maj_cover)
+mc<-lm(tgnet~cca_cover + mac_cover +turf_cover + numb_gen +tot_cover, data = maj_cover)
+options(na.action = 'na.fail')
+plot(m2)
+
+
+mods<-dredge(m1)
+head(mods)
+b<-model.avg(mods, subset = delta<2, beta='sd')
+b<-model.avg(mods, subset = cumsum(weight) <= .95)
+summary(b)
+
+plot(m1)
+plot(mm1)
+summary(m1)
+summary(mm1)
+AIC(m0,m1,mm0,mm1)
+
+
