@@ -153,7 +153,7 @@ ggsave(here("figs",
           axis.ticks = element_line(colour = 'black'),axis.text = element_text(size = 8), 
           legend.position = 'none'))
 
-(mac<-ggplot(dat,aes(x=sitenum, y=(mac_cover), group = Site))+
+(mac<-ggplot(dat,aes(x=sitenum, y=(cca_cover), group = Site))+
     geom_rect(aes(xmin = 7.5, xmax = 8.5,ymin = 0, ymax =30), fill='lightgrey')+
     geom_boxplot(outlier.shape=NA, aes(fill = NULL, group = Site), width = 0.5) + 
     scale_fill_grey() +
@@ -389,7 +389,6 @@ qqline(log(subset(dat, Site != 'Mean')$ccaprod_mean+ ( 1 - min(dat$ccaprod_mean)
 
 m3<-kruskal.test(ccaprod_mean ~ Site, data = subset(dat, Site != 'Mean'))
 summary(m3)               
-TukeyHSD(m3, 'Site', ordered = FALSE, conf.level = 0.95)
 
 dat1<-subset(dat, Site != 'Mean')
 PT = pairwise.wilcox.test(dat1$ccaprod_mean,dat1$Site,  p.adjust.method = 'none')
@@ -459,8 +458,4 @@ TukeyHSD(m8, 'Site', ordered = FALSE, conf.level = 0.95)
 
 summarySE(data=dat, measurevar = 'mac_cover', groupvars = 'Site')
 
-dat$cover_weedy <- dat$cover_weedy*(dat$coral_cover/100)
-dat$cover_stress <- dat$cover_stress*(dat$coral_cover/100)
-dat$cover_general <- dat$cover_general*(dat$coral_cover/100)
-dat$cover_comp <- dat$cover_comp*(dat$coral_cover/100)
 

@@ -9,6 +9,7 @@ library(car)
 library(grid)
 
 maj_cover<-read.csv('major_cover.csv')
+maj_cover<-maj_cover[1:42,]
 
 ## ID dominant (largest cover) genera at each site
 maj_cover$dom<-colnames(maj_cover[,c(32:35)])[max.col(maj_cover[,c(32:35)],
@@ -107,10 +108,104 @@ ggsave(here("figs",
             "Fig_4_col.png"), 
        width = 8, height = 6)
 
+#######lhs
 
+maj_cover$domlhs<-colnames(maj_cover[,c(37:40)])[max.col(maj_cover[,c(37:40)],
+                                                      ties.method="first")]
+pal<-c('#e9ef6f','#90b3fa','#626175','#ff9100') 
+## taken from the Naso_lituratus scale in the Fishualize package
+(all<-ggplot(data=maj_cover, aes(x = tot_cover, y = gnet))+
+    geom_point(aes(colour = domlhs, shape=domlhs), size =2)+
+    stat_smooth(method = 'lm', colour = 'black', linetype =3, alpha =0.2)+
+    scale_shape_manual(values = c(15,17,18,19), guide = F)+
+    scale_colour_manual(values = pal, 
+                        labels = c('Comp.', 'General', 'Stress', 'Weedy'))+
+    stat_smooth(aes(colour = domlhs, group = domlhs),method='lm', alpha = 0.2)+
+    #scale_colour_fish_d(option = 'Naso_lituratus', labels = c('Branching', 'Encrusting', 'Massive', 'Other'))+theme_minimal()+
+    geom_hline(yintercept = 0, linetype = 2)+
+    scale_x_continuous(name = '',limits = c(-1,50), expand = c(0,0))+
+    scale_y_continuous(name = expression(paste('')),
+                       limits=c(-4,10), breaks = c(-4,-2,0,2,4,6,8,10), expand = c(0,0))+
+    theme(panel.grid = element_blank(),
+          panel.background = element_rect(fill = NA, colour = NA),
+          axis.line = element_line(colour = 'black'),
+          axis.ticks = element_line(colour = 'black'),
+          legend.position = 'top', legend.title = element_blank(),
+          legend.spacing.x = unit(0.4, 'cm'),
+          legend.key.height = unit(0.2, 'cm'),
+          legend.key.width = unit(0.8, 'cm')))
+
+(comp<-ggplot(data=maj_cover, aes(x = comp, y = gnet))+
+    geom_point(size = 2, colour = 	'#626175')+
+    stat_smooth(method='lm', colour = '#626175', linetype =3, alpha =0.2)+
+    scale_x_continuous(name = ' ', limits = c(-0.33,10), expand = c(0,0))+
+    scale_y_continuous(name = '',
+                       limits=c(-4,8), breaks = c(-4,0,4,8), expand = c(0,0))+
+    geom_hline(yintercept = 0, linetype = 2)+
+    theme(panel.grid = element_blank(),
+          panel.background = element_rect(fill = NA, colour = NA),
+          axis.line = element_line(colour = 'black'),
+          axis.ticks = element_line(colour = 'black')))
+
+(general<-ggplot(data=maj_cover, aes(x = general, y = gnet))+
+    geom_point(size = 2,colour = '#ff9100')+
+    stat_smooth(method='lm', colour = '#ff9100', linetype =3, alpha =0.2)+
+    scale_x_continuous(name = ' ', limits = c(-0.8,40), expand = c(0,0))+
+    scale_y_continuous(name = '',
+                       limits=c(-4,8), breaks = c(-4,0,4,8), expand = c(0,0))+
+    geom_hline(yintercept = 0, linetype = 2)+
+    theme(panel.grid = element_blank(),
+          panel.background = element_rect(fill = NA, colour = NA),
+          axis.line = element_line(colour = 'black'),
+          axis.ticks = element_line(colour = 'black')))
+
+(stress<-ggplot(data=maj_cover, aes(x = stress, y = gnet))+
+    geom_point(size = 2,colour = '#90b3fa')+
+    stat_smooth(method='lm', colour = '#90b3fa', linetype =3, alpha =0.2)+
+    scale_x_continuous(name = ' ', expand = c(0,0), limits=c(-0.5,40))+
+    scale_y_continuous(name = '',
+                       limits=c(-4,8), breaks = c(-4,0,4,8), expand = c(0,0))+
+    geom_hline(yintercept = 0, linetype = 2)+
+    theme(panel.grid = element_blank(),
+          panel.background = element_rect(fill = NA, colour = NA),
+          axis.line = element_line(colour = 'black'),
+          axis.ticks = element_line(colour = 'black')))
+
+(weedy<-ggplot(data=maj_cover, aes(x = weedy, y = gnet))+
+    geom_point(size = 2,colour = 	'#e9ef6f')+
+     stat_smooth(method='lm', colour = '#e9ef6f', linetype =3, alpha =0.2)+
+    scale_x_continuous(name = ' ', expand = c(0,0), limits=c(-0.5, 10))+
+    scale_y_continuous(name = '',
+                       limits=c(-4,8), breaks = c(-4,0,4,8), expand = c(0,0))+
+    geom_hline(yintercept = 0, linetype = 2)+
+    theme(panel.grid = element_blank(),
+          panel.background = element_rect(fill = NA, colour = NA),
+          axis.line = element_line(colour = 'black'),
+          axis.ticks = element_line(colour = 'black')))
+
+
+# bottom_row <- plot_grid(mass, other, enc, branch, 
+# labels = c( 'B', 'C', 'D', 'E'), nrow = 1)
+right_col <- plot_grid(comp, general, stress, weedy, 
+                       labels = c( 'B', 'C', 'D', 'E'),
+                       nrow = 4)
+# rowcov<-plot_grid(all, bottom_row, labels = 'A', nrow = 2, rel_heights = c(6/10,4/10))
+# ggsave(here("figs", 
+#             "Fig_4_row.png"), 
+#        width = 8, height = 6)
+
+(collhs<-plot_grid(all, right_col, labels = 'A', nrow = 1, 
+                   rel_widths = c(7/10,3/10),scale = 0.95)+
+    draw_label('Coral Cover (%)', x=0.5, y = 0, vjust = -0.8, angle = 0)+
+    draw_label(expression(paste('Gnet (kg CaCO'[3],' m'^-2, ' yr'^-1, ')')),
+               x=0, y = 0.5, vjust = 1, angle = 90))
+
+ggsave(here("figs", 
+            "Fig_4_col.png"), 
+       width = 8, height = 6)
 
 ####model selection##########
-
+options(na.action = 'na.fail')
 ## morphological categories
 ##null models
 m0<-lm(tgnet~1, data = maj_cover)
@@ -203,7 +298,7 @@ lhs$mean <- factor(lhs$mean, levels = lhs$mean[order(lhs$estimate)])
     annotate("text", label = '***', x = 6.2, y = 0.33359, size = 5)+
     annotate("text", label = '***', x = 7.2, y = 0.43162, size = 5)+
     geom_hline(yintercept=0, lty=2) +# add a dotted line at x=1 after flip
-    scale_x_discrete(name = NULL, labels = c('CCA','Macroalgae', 'Turf','Generalist','Rugosity','Stress-tolerant', 'Weedy'))+ 
+  #  scale_x_discrete(name = NULL, labels = c('CCA','Macroalgae', 'Turf','Generalist','Rugosity','Stress-tolerant', 'Weedy'))+ 
     coord_flip() +  # flip coordinates (puts labels on y axis)
     xlab("Variable") + ylab("Mean (95% CI)") +
     theme_minimal())
@@ -261,35 +356,4 @@ plot_grid(MORPHS, LHS, TOT, labels = c('A', 'B', 'C'), label_size = 12, align = 
 ggsave(here("figs", 
             "Fig_5.png"), 
        width = 4, height = 6)
-
-plot(m1)
-plot(mm1)
-summary(m1)
-summary(mm1)
-AIC(m0,m1,mm0,mm1)
-
-
-
-
-
-########### NOT FREQUENT ENOUGH OCCURENCES OF ANY GENERA TO REALLY DO THE ANALYSIS ############
-gen_cover<-read.csv('cover_genera.csv')
-
-gen_cover2<-melt(gen_cover[,c(3,4,6:46)], id.vars = c('Site', 'Transect'), value.name = 'percent')
-head(gen_cover)
-gen_cover2 %>% 
-  group_by(variable) %>% 
-  summarise(sumer =  sum(percent)) %>% 
-  arrange(desc(sumer)) %>% 
-  View()
-
-(por<-ggplot(data=gen_cover, aes(x = Porites, y = gnet))+geom_point())
-(gal<-ggplot(data=gen_cover, aes(x = Echinopora, y = gnet))+geom_point())
-(merl<-ggplot(data=gen_cover, aes(x = Merulina, y = gnet))+geom_point())
-
-View(dat)
-head(gen_cover)
-
-
-
 
