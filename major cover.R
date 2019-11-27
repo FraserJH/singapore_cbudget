@@ -10,15 +10,18 @@ library(grid)
 
 maj_cover<-read.csv('major_cover.csv')
 maj_cover<-maj_cover[1:42,]
+maj_cover$protect<-maj_cover$stress + maj_cover$comp
+
 
 ## ID dominant (largest cover) genera at each site
 maj_cover$dom<-colnames(maj_cover[,c(32:35)])[max.col(maj_cover[,c(32:35)],
                                                       ties.method="first")]
 # Gnet (kg CaCO'[3],' m'^-2, ' yr'^-1, ')
 
+
 pal<-c('#e9ef6f','#90b3fa','#626175','#ff9100') 
 ## taken from the Naso_lituratus scale in the Fishualize package
-(all<-ggplot(data=maj_cover, aes(x = tot_cover, y = gnet))+
+(all<-ggplot(data=maj_cover, aes(x = tot_cover, y = v_accret))+
     geom_point(aes(colour = dom, shape=dom), size =2)+
     stat_smooth(method = 'lm', colour = 'black', linetype =3, alpha =0.2)+
     scale_shape_manual(values = c(15,17,18,19), guide = F)+
@@ -39,7 +42,7 @@ pal<-c('#e9ef6f','#90b3fa','#626175','#ff9100')
   legend.key.height = unit(0.2, 'cm'),
   legend.key.width = unit(0.8, 'cm')))
 
-(mass<-ggplot(data=maj_cover, aes(x = tot_mass, y = gnet))+
+(mass<-ggplot(data=maj_cover, aes(x = tot_mass, y = v_accret))+
     geom_point(size = 2, colour = 	'#626175')+
     stat_smooth(method='lm', colour = '#626175', linetype =3, alpha =0.2)+
     scale_x_continuous(name = ' ', limits = c(-0.33,15), expand = c(0,0))+
@@ -51,7 +54,7 @@ pal<-c('#e9ef6f','#90b3fa','#626175','#ff9100')
         axis.line = element_line(colour = 'black'),
         axis.ticks = element_line(colour = 'black')))
 
-(other<-ggplot(data=maj_cover, aes(x = tot_other, y = gnet))+
+(other<-ggplot(data=maj_cover, aes(x = tot_other, y = v_accret))+
     geom_point(size = 2,colour = '#ff9100')+
     stat_smooth(method='lm', colour = '#ff9100', linetype =3, alpha =0.2)+
     scale_x_continuous(name = ' ', limits = c(-0.8,40), expand = c(0,0))+
@@ -63,7 +66,7 @@ pal<-c('#e9ef6f','#90b3fa','#626175','#ff9100')
           axis.line = element_line(colour = 'black'),
           axis.ticks = element_line(colour = 'black')))
 
-(enc<-ggplot(data=maj_cover, aes(x = tot_enc, y = gnet))+
+(enc<-ggplot(data=maj_cover, aes(x = tot_enc, y = v_accret))+
     geom_point(size = 2,colour = '#90b3fa')+
     stat_smooth(method='lm', colour = '#90b3fa', linetype =3, alpha =0.2)+
     scale_x_continuous(name = ' ', expand = c(0,0), limits=c(-0.5,26))+
@@ -75,7 +78,7 @@ pal<-c('#e9ef6f','#90b3fa','#626175','#ff9100')
           axis.line = element_line(colour = 'black'),
           axis.ticks = element_line(colour = 'black')))
 
-(branch<-ggplot(data=maj_cover, aes(x = tot_branch, y = gnet))+
+(branch<-ggplot(data=maj_cover, aes(x = tot_branch, y = v_accret))+
     geom_point(size = 2,colour = 	'#e9ef6f')+
    # stat_smooth(method='lm', colour = '#e9ef6f', linetype =3, alpha =0.2)+
     scale_x_continuous(name = ' ', expand = c(0,0), limits=c(-0.5, 15))+
@@ -90,15 +93,15 @@ pal<-c('#e9ef6f','#90b3fa','#626175','#ff9100')
 
 # bottom_row <- plot_grid(mass, other, enc, branch, 
 # labels = c( 'B', 'C', 'D', 'E'), nrow = 1)
-right_col <- plot_grid(mass, other, enc, branch, 
-                       labels = c( 'B', 'C', 'D', 'E'),
+right_col <- cowplot::plot_grid(mass, other, enc, branch, 
+                       labels = c( '(b)', '(c)', '(d)', '(e)'), label_x = -0.04,label_y = 1.05,
                         nrow = 4)
 # rowcov<-plot_grid(all, bottom_row, labels = 'A', nrow = 2, rel_heights = c(6/10,4/10))
 # ggsave(here("figs", 
 #             "Fig_4_row.png"), 
 #        width = 8, height = 6)
 
-(colcov<-plot_grid(all, right_col, labels = 'A', nrow = 1, 
+(colcov<-cowplot::plot_grid(all, right_col, labels = '(a)', nrow = 1, 
                    rel_widths = c(7/10,3/10),scale = 0.95)+
 draw_label('Coral Cover (%)', x=0.5, y = 0, vjust = -0.8, angle = 0)+
     draw_label(expression(paste('Gnet (kg CaCO'[3],' m'^-2, ' yr'^-1, ')')),
@@ -107,6 +110,11 @@ draw_label('Coral Cover (%)', x=0.5, y = 0, vjust = -0.8, angle = 0)+
 ggsave(here("figs", 
             "Fig_4_col.png"), 
        width = 8, height = 6)
+
+ggsave(here("figs", 
+            "Fig_4_col.eps"),family = 'sans', device = 'eps', 
+       width = 8, height = 6)
+
 
 #######lhs
 
@@ -298,7 +306,7 @@ lhs$mean <- factor(lhs$mean, levels = lhs$mean[order(lhs$estimate)])
     annotate("text", label = '***', x = 6.2, y = 0.33359, size = 5)+
     annotate("text", label = '***', x = 7.2, y = 0.43162, size = 5)+
     geom_hline(yintercept=0, lty=2) +# add a dotted line at x=1 after flip
-  #  scale_x_discrete(name = NULL, labels = c('CCA','Macroalgae', 'Turf','Generalist','Rugosity','Stress-tolerant', 'Weedy'))+ 
+    scale_x_discrete(name = NULL, labels = c('CCA','Macroalgae', 'Turf','Generalist','Rugosity','Stress-tolerant', 'Weedy'))+ 
     coord_flip() +  # flip coordinates (puts labels on y axis)
     xlab("Variable") + ylab("Mean (95% CI)") +
     theme_minimal())
@@ -314,10 +322,11 @@ mmc<-lmer(tgnet~cca_cover + mac_cover +turf_cover + numb_gen +tot_cover
         + Rugosity + (1|Site),  data = maj_cover)
 
 AIC(m0,mm0,mc,mmc) #lm for the win
-
+plot(mc)
 
 mods3<-dredge(mc, beta='sd', extra = c("R^2", "adjR^2") )
 head(mods3)
+
 top_mods3<-subset(mods3, delta <2)
 d<-model.avg(mods3, subset = delta<2)
 
@@ -351,9 +360,22 @@ tot$mean <- factor(tot$mean, levels = tot$mean[order(tot$estimate)])
 
 
 
-plot_grid(MORPHS, LHS, TOT, labels = c('A', 'B', 'C'), label_size = 12, align = 'v',
+cowplot::plot_grid(MORPHS, LHS, TOT, labels = c('(a)', '(b)', '(c)'), label_y = 1.03, label_size = 12, align = 'v',
           nrow =3, axis='l')
 ggsave(here("figs", 
-            "Fig_5.png"), 
+            "Fig_3.png"), 
        width = 4, height = 6)
 
+ggsave(here("figs", 
+            "Fig_3.eps"),device = 'eps', family = 'sans', 
+       width = 4, height = 6)
+
+
+(prod<-ggplot(data=maj_cover)+geom_point(aes(x=tot_other, y = prod_oth), colour='blue')+
+    stat_smooth(aes(x=tot_other, y = prod_oth),method='lm')+
+    geom_point(aes(x=tot_branch, y = prod_branchinf), colour='red')+
+    stat_smooth(aes(x=tot_branch, y = prod_branchinf),method='lm')+
+    geom_point(aes(x=tot_mass, y = prod_mass), colour='orange')+
+    stat_smooth(aes(x=tot_mass, y = prod_mass),method='lm')+
+    geom_point(aes(x=tot_enc, y = prod_enc), colour='green')+
+    stat_smooth(aes(x=tot_enc, y = prod_enc),method='lm'))

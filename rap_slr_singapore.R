@@ -36,6 +36,7 @@ maj_cover$sitenum <- as.numeric(maj_cover$Site)
 #           axis.line.y = element_line(colour = 'black'),
 #           axis.ticks = element_line(colour = 'black')))
 
+plot(v_accret~tot_cover, data =maj_cover)
 
 ### by transect delta rates
 maj_cover<-maj_cover[order(-maj_cover$v_accret),]
@@ -84,7 +85,8 @@ maj_cover$order<-seq(1:42)
           axis.text = element_text(size = 8),
           legend.position = 'none'))
 
-(plot_grid(vaccret, vaccret4.5, vaccret8.5, labels = c("A", "B","C"), label_size = 8,ncol=3)+
+(plot_grid(vaccret, vaccret4.5, vaccret8.5, labels = c("(a)", "(b)","(c)"), label_size = 8,ncol=3)+
     draw_label(expression(paste('Difference between SLR & Vertical Accretion (mm yr'^-2,')')),
                x=-0, y = 0.5, vjust = 1, angle = 90, size = 8))
-ggsave(here('figs', 'Fig_SLR.png'), width = 8, height = 3)
+ggsave(here::here('figs', 'Fig_6.png'), width = 8, height = 3)
+ggsave(here::here('figs', 'Fig_6.eps'), width = 8, height = 3, family = 'sans')
