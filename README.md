@@ -1,12 +1,12 @@
 # singapore_cbudget
 Carbonate budget and erosion assessment Singapore
 
-Analysis for ReefBudget carbonate assessment of 7 reefs in Singapore
+Data, statistical models, and R scripts accompanying Januchowski-Hartley et al. Accreting coral reefs in a highly urbanized environment, 2020, Coral Reefs
 
-Timeline: 
-August 2017 - ongoing: cca tiles deployed in 6 monthly intervals
-November 2017: ReefBudget surveys
-March 2018: Porites cores deployed for bioerosion assessment
-March 2019: First set of porites cores recovered (3 per site)
+(link to follow)
 
-This is a line from RStudio
+data contains .csv files of data underlying Figures 2-6, all ESM figures and analysis
+
+figs contains output figure
+
+Data viz and analyses were run in R 3.6.0, using packages tidyverse, fishualize, lme4, MuMIn lmerTest and others
