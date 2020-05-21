@@ -3,7 +3,7 @@ Carbonate budget and erosion assessment Singapore
 
 Data, statistical models, and R scripts accompanying Januchowski-Hartley et al. Accreting coral reefs in a highly urbanized environment, 2020, Coral Reefs
 
-(link to follow)
+https://link.springer.com/article/10.1007/s00338-020-01953-3
 
 data contains .csv files of data underlying Figures 2-6, all ESM figures and analysis
 
